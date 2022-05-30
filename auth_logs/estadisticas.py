@@ -1,3 +1,6 @@
+import os
+import csv
+
 def get_ipv4( text ):
   ip = ''
   numero_grupo = ''
@@ -27,6 +30,7 @@ def get_ipv4( text ):
     return ''
 
 logs_palabra = {}
+logs_fecha_hora = {}
 logs_ip = {}
 listado_ips = {}
 
@@ -72,25 +76,61 @@ def procesar_log( nombre_archivo ):
 
     #Catalogar por primera palabra del mensaje
     
-    if not(primera_palabra in logs_palabra):
+    if not primera_palabra in logs_palabra:
       logs_palabra[ primera_palabra ] = []
 
     logs_palabra[ primera_palabra ].append(registro)
 
     #Catalogar por ipv4
     if mensaje_ip4 == '':
-      mensaje_ip4 = 'sin ip'
+      mensaje_ip4 = 'sin_catalogar'
     
-    if not(mensaje_ip4 in logs_ip):
+    if not mensaje_ip4 in logs_ip:
       logs_ip[ mensaje_ip4 ] = []
       listado_ips[ mensaje_ip4 ] = { "cant_intentos": 1 }
     else:
       listado_ips[ mensaje_ip4 ][ "cant_intentos" ] += 1
 
     logs_ip[ mensaje_ip4 ].append(registro)
+
+    #Catalogar por fecha y hora
+    if not mes in logs_fecha_hora:
+      logs_fecha_hora[mes] = {}
+    
+    if not dia in logs_fecha_hora[mes]:
+      logs_fecha_hora[mes][dia] = {}
+    
+    if not hora in logs_fecha_hora[mes][dia]:
+      logs_fecha_hora[mes][dia][hora] = {}
+    
+    if not minuto in logs_fecha_hora[mes][dia][hora]:
+      logs_fecha_hora[mes][dia][hora][minuto] = {}
+
+    if not segundo in logs_fecha_hora[mes][dia][hora][minuto]:
+      logs_fecha_hora[mes][dia][hora][minuto][segundo] = []
+
+    logs_fecha_hora[mes][dia][hora][minuto][segundo].append(registro)
+  
   archivo.close()
 
-procesar_log("logs/auth.log")
+lista_archivos = os.listdir("logs")
 
-print (listado_ips)
+print('############################################################# \n LISTADO DE LOGS ENCONTRADOS \n')
 
+print(lista_archivos)
+
+for archivo in lista_archivos:
+  print('procesando archivo: '+archivo)
+  procesar_log("logs/"+archivo)
+
+print('------------------------------------------------------------- \n LISTADO DE CANTIDAD DE REGISTROS POR IP \n')
+
+
+
+with open('resultado/ips.csv', 'w') as csvfile:
+  filewriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+  filewriter.writerow(['IP', 'Cantidad registros'])
+
+  for ip in listado_ips:
+    print(ip + ' > ' + str(listado_ips[ip]["cant_intentos"]))
+    filewriter.writerow([ip, listado_ips[ip]["cant_intentos"]])
