@@ -43,6 +43,9 @@ def procesar_log( nombre_archivo ):
     dia     = fecha[1]
     hora    = fecha[2]
     minuto  = split_linea[1]
+    if (len(fecha) == 4):
+      dia     = fecha[2]
+      hora    = fecha[3]
 
     split_linea_2_s = split_linea[2].split(" ")
 
@@ -125,12 +128,3 @@ for archivo in lista_archivos:
 
 print('------------------------------------------------------------- \n LISTADO DE CANTIDAD DE REGISTROS POR IP \n')
 
-
-
-with open('resultado/ips.csv', 'w') as csvfile:
-  filewriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-  filewriter.writerow(['IP', 'Cantidad registros'])
-
-  for ip in listado_ips:
-    print(ip + ' > ' + str(listado_ips[ip]["cant_intentos"]))
-    filewriter.writerow([ip, listado_ips[ip]["cant_intentos"]])
