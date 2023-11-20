@@ -128,3 +128,33 @@ for archivo in lista_archivos:
 
 print('------------------------------------------------------------- \n LISTADO DE CANTIDAD DE REGISTROS POR IP \n')
 
+
+
+with open('resultado/ips.csv', 'w') as csvfile:
+  filewriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+  filewriter.writerow(['IP', 'Cantidad registros'])
+  #Se genera archivo .CSV cantidad intentos por IP
+  for ip in listado_ips:
+    print(ip + ' > ' + str(listado_ips[ip]["cant_intentos"]))
+    filewriter.writerow([ip, listado_ips[ip]["cant_intentos"]])
+
+with open('resultado/incidencias_dia.csv', 'w') as csvfile:
+  filewriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+  filewriter.writerow(['Mes', 'Día', 'Cantidad incidencias'])
+
+  #Se cuantan la cantidad de incidencias por día
+  cant_incidencias_fecha = {}
+  for log_mes in logs_fecha_hora:
+    cant_incidencias_fecha[log_mes] = {}
+    for log_dia in logs_fecha_hora[log_mes]:
+      cant_incidencias_fecha[log_mes][log_dia] = 0
+      for log_hora in logs_fecha_hora[log_mes][log_dia]:
+        for log_minuto in logs_fecha_hora[log_mes][log_dia][log_hora]:
+          for log_segundo in logs_fecha_hora[log_mes][log_dia][log_hora][log_minuto]:
+            for log in logs_fecha_hora[log_mes][log_dia][log_hora][log_minuto][log_segundo]:
+              cant_incidencias_fecha[log_mes][log_dia] = cant_incidencias_fecha[log_mes][log_dia] + 1
+  
+  for _mes in cant_incidencias_fecha:
+    for _dia in cant_incidencias_fecha[_mes]:
+      print(_mes + ' ' + _dia + ' > ' +  str(cant_incidencias_fecha[_mes][_dia]))
+      filewriter.writerow([_mes, _dia, str(cant_incidencias_fecha[_mes][_dia])])
